@@ -65,6 +65,11 @@ export async function action({ request }: Route.ActionArgs) {
         status: "IN_STOCK",
       }
     });
+  } else if (intent === "delete") {
+    const itemId = formData.get("itemId") as string;
+    await prisma.inventoryItem.delete({
+      where: { id: itemId, userId: user.id } // Ensures the user owns the item
+    });
   }
 
   return { ok: true };

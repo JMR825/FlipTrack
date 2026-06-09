@@ -1,15 +1,21 @@
 import styles from "./expenses-summary.module.css";
 
-interface Props { className?: string; }
+interface Props { className?: string; expenses?: any[]; recurring?: any[]; }
 
-const cards = [
-  { label: "Total Expenses", value: "$239", sub: "This month" },
-  { label: "Marketplace Fees", value: "$67", sub: "Largest category" },
-  { label: "Avg per Sale", value: "$47.80", sub: "This month" },
-  { label: "% of Revenue", value: "17.8%", sub: "This month" },
-];
+export function ExpensesSummary({ className, expenses = [], recurring = [] }: Props) {
+  let totalExpenses = 0;
+  
+  expenses.forEach(e => totalExpenses += Number(e.amount));
+  recurring.forEach(r => {
+    if (r.isActive) totalExpenses += Number(r.amount);
+  });
 
-export function ExpensesSummary({ className }: Props) {
+  const cards = [
+    { label: "Total Expenses", value: `$${totalExpenses.toFixed(2)}`, sub: "All time" },
+    { label: "Recurring Monthly", value: `$${recurring.filter(r => r.isActive).reduce((acc, r) => acc + Number(r.amount), 0).toFixed(2)}`, sub: "Active subscriptions" },
+    { label: "One-Time Expenses", value: `$${expenses.reduce((acc, e) => acc + Number(e.amount), 0).toFixed(2)}`, sub: "Logged purchases" },
+  ];
+
   return (
     <div className={[styles.row, className].filter(Boolean).join(" ")}>
       {cards.map(c => (

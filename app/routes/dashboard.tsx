@@ -11,6 +11,8 @@ import { SalesByMarketplacePie } from "~/blocks/dashboard/sales-by-marketplace-p
 import { TopSellingItemsTable } from "~/blocks/dashboard/top-selling-items-table";
 import { RecentSales } from "~/blocks/dashboard/recent-sales";
 
+import { AIInsightsPanel } from "~/blocks/dashboard/ai-insights-panel";
+
 const prisma = new PrismaClient();
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -45,14 +47,15 @@ export default function DashboardPage() {
   return (
     <div className={styles.page}>
       <DashboardHeader />
-      <StatsCardsRow />
-      <CashFlowChart />
+      <AIInsightsPanel />
+      <StatsCardsRow stats={inventoryStats} sales={salesData} expenses={expensesData} />
+      <CashFlowChart sales={salesData} expenses={expensesData} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)", marginBottom: "var(--space-6)" }}>
-        <TopBrandsChart />
-        <SalesByMarketplacePie />
+        <TopBrandsChart sales={salesData} />
+        <SalesByMarketplacePie sales={salesData} />
       </div>
-      <TopSellingItemsTable />
-      <RecentSales />
+      <TopSellingItemsTable sales={salesData} />
+      <RecentSales sales={salesData} />
     </div>
   );
 }

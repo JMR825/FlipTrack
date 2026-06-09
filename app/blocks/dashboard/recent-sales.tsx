@@ -1,10 +1,15 @@
 import { Link } from "react-router";
-import { mockSales } from "~/data/mock-data";
 import styles from "./recent-sales.module.css";
 
-interface Props { className?: string; }
+interface Props { className?: string; sales?: any[]; }
 
-export function RecentSales({ className }: Props) {
+export function RecentSales({ className, sales = [] }: Props) {
+  const recentSales = sales.slice(0, 5);
+
+  if (recentSales.length === 0) {
+    return <div className={[styles.card, className].filter(Boolean).join(" ")}><div className={styles.header}><span className={styles.title}>Recent Sales</span></div><p style={{padding: '1rem', color: 'var(--color-text-subtle)'}}>No sales logged yet.</p></div>;
+  }
+
   return (
     <div className={[styles.card, className].filter(Boolean).join(" ")}>
       <div className={styles.header}>
@@ -22,19 +27,22 @@ export function RecentSales({ className }: Props) {
           </tr>
         </thead>
         <tbody>
-          {mockSales.map(s => (
-            <tr key={s.id}>
-              <td className={styles.td}>{s.item}</td>
-              <td className={styles.td}>{s.marketplace}</td>
-              <td className={styles.td}>${s.salePrice}</td>
-              <td className={styles.td}>{s.date}</td>
-              <td className={styles.td}>
-                <span className={[styles.profitBadge, s.profit >= 0 ? styles.positive : styles.negative].join(" ")}>
-                  {s.profit >= 0 ? "+" : ""}{s.profit}
-                </span>
-              </td>
-            </tr>
-          ))}
+          {recentSales.map(s => {
+            const profit = Number(s.salePrice) - Number(s.inventoryItem.purchasePrice);
+            return (
+              <tr key={s.id}>
+                <td className={styles.td}>{s.inventoryItem.name}</td>
+                <td className={styles.td}>{s.marketplace}</td>
+                <td className={styles.td}>${Number(s.salePrice).toFixed(2)}</td>
+                <td className={styles.td}>{new Date(s.saleDate).toLocaleDateString()}</td>
+                <td className={styles.td}>
+                  <span className={[styles.profitBadge, profit >= 0 ? styles.positive : styles.negative].join(" ")}>
+                    {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Form } from "react-router";
 import { IconX } from "@tabler/icons-react";
 import styles from "./add-item-modal.module.css";
 
@@ -20,29 +21,32 @@ export function AddItemModal({ className, onClose }: Props) {
             <div key={s} className={[styles.step, i === step ? styles.active : ""].join(" ")} onClick={() => setStep(i)}>Step {i+1}: {s}</div>
           ))}
         </div>
-        <div className={styles.body}>
+        <Form method="post" action="/app/inventory" onSubmit={() => onClose()}>
+          <input type="hidden" name="intent" value="create" />
+          <div className={styles.body}>
           {step === 0 && (
             <>
-              <div className={styles.field}><label className={styles.label}>SKU *</label><input className={styles.input} placeholder="e.g. DD1391-100" /></div>
-              <div className={styles.field}><label className={styles.label}>Product Name *</label><input className={styles.input} placeholder="e.g. Air Jordan 1 Retro High OG Chicago" /></div>
+              <div className={styles.field}><label className={styles.label}>SKU *</label><input name="sku" className={styles.input} placeholder="e.g. DD1391-100" required /></div>
+              <div className={styles.field}><label className={styles.label}>Product Name *</label><input name="name" className={styles.input} placeholder="e.g. Air Jordan 1 Retro High OG Chicago" required /></div>
               <div className={styles.row}>
-                <div className={styles.field}><label className={styles.label}>Brand *</label><input className={styles.input} placeholder="Nike" /></div>
-                <div className={styles.field}><label className={styles.label}>Size *</label><input className={styles.input} placeholder="10.5" /></div>
+                <div className={styles.field}><label className={styles.label}>Brand *</label><input name="brand" className={styles.input} placeholder="Nike" required /></div>
+                <div className={styles.field}><label className={styles.label}>Size *</label><input name="size" className={styles.input} placeholder="10.5" required /></div>
               </div>
-              <div className={styles.field}><label className={styles.label}>Colorway</label><input className={styles.input} placeholder="e.g. Varsity Red/Black/White" /></div>
+              <div className={styles.field}><label className={styles.label}>Colorway</label><input name="colorway" className={styles.input} placeholder="e.g. Varsity Red/Black/White" /></div>
             </>
           )}
           {step === 1 && (
             <>
               <div className={styles.row}>
-                <div className={styles.field}><label className={styles.label}>Purchase Price *</label><input className={styles.input} type="number" placeholder="170" /></div>
-                <div className={styles.field}><label className={styles.label}>Purchase Date *</label><input className={styles.input} type="date" /></div>
+              <div className={styles.row}>
+                <div className={styles.field}><label className={styles.label}>Purchase Price *</label><input name="purchasePrice" className={styles.input} type="number" placeholder="170" required /></div>
+                <div className={styles.field}><label className={styles.label}>Purchase Date *</label><input name="purchaseDate" className={styles.input} type="date" required /></div>
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>Condition</label>
-                <select className={styles.input}><option>Deadstock</option><option>New with Box</option><option>Used</option></select>
+                <select name="condition" className={styles.input}><option value="DEADSTOCK">Deadstock</option><option value="NEW_WITH_BOX">New with Box</option><option value="USED">Used</option></select>
               </div>
-              <div className={styles.field}><label className={styles.label}>Notes</label><textarea className={styles.input} rows={3} placeholder="Any additional notes..."></textarea></div>
+              <div className={styles.field}><label className={styles.label}>Notes</label><textarea name="notes" className={styles.input} rows={3} placeholder="Any additional notes..."></textarea></div>
             </>
           )}
           {step === 2 && (
@@ -54,11 +58,21 @@ export function AddItemModal({ className, onClose }: Props) {
               <div className={styles.field}><label className={styles.label}>Asking Price</label><input className={styles.input} type="number" placeholder="Optional" /></div>
             </>
           )}
-        </div>
-        <div className={styles.footer}>
-          <button className={styles.backBtn} onClick={() => step > 0 ? setStep(s => s - 1) : onClose()}>{step > 0 ? "Back" : "Cancel"}</button>
-          <button className={styles.nextBtn} onClick={() => step < 2 ? setStep(s => s + 1) : onClose()}>{step < 2 ? "Next" : "Add Item"}</button>
-        </div>
+          </div>
+          <div className={styles.footer}>
+            {step > 0 ? (
+              <button type="button" className={styles.backBtn} onClick={() => setStep(s => s - 1)}>Back</button>
+            ) : (
+              <button type="button" className={styles.backBtn} onClick={onClose}>Cancel</button>
+            )}
+            
+            {step < 2 ? (
+              <button type="button" className={styles.nextBtn} onClick={() => setStep(s => s + 1)}>Next</button>
+            ) : (
+              <button type="submit" className={styles.nextBtn}>Add Item</button>
+            )}
+          </div>
+        </Form>
       </div>
     </div>
   );

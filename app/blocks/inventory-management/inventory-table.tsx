@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Form } from "react-router";
 import styles from "./inventory-table.module.css";
 
 interface Props { className?: string; selected: string[]; onSelectChange: (ids: string[]) => void; items: any[]; }
@@ -39,8 +39,17 @@ export function InventoryTable({ className, selected, onSelectChange, items }: P
                   <td className={styles.td}>${Number(item.purchasePrice)}</td>
                   <td className={styles.td}>${item.marketValue || Number(item.purchasePrice)}</td>
                   <td className={styles.td}><span className={pl >= 0 ? styles.positive : styles.negative}>{pl >= 0 ? "+" : ""}${pl}</span></td>
-                  <td className={styles.td}><span className={[styles.badge, statusClass[item.status]].join(" ")}>{statusLabel[item.status]}</span></td>
-                  <td className={styles.td}><button className={styles.actionBtn}>Edit</button></td>
+                  <td className={styles.td}><span className={[styles.badge, statusClass[item.status]].join(" ")}>{statusLabel[item.status] || item.status}</span></td>
+                  <td className={styles.td}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className={styles.actionBtn}>Edit</button>
+                      <Form method="post" action="/app/inventory" style={{ display: 'inline' }}>
+                        <input type="hidden" name="intent" value="delete" />
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <button type="submit" className={styles.actionBtn} style={{ color: 'var(--color-danger)' }}>Delete</button>
+                      </Form>
+                    </div>
+                  </td>
                 </tr>
               );
             })}

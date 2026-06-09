@@ -1,15 +1,29 @@
 import styles from "./sales-summary-cards.module.css";
 
-interface Props { className?: string; }
+interface Props { className?: string; sales?: any[]; }
 
-const cards = [
-  { label: "Total Sales", value: "5", sub: "This month" },
-  { label: "Total Revenue", value: "$1,345", sub: "This month" },
-  { label: "Net Profit", value: "$443", sub: "This month", positive: true },
-  { label: "Avg Profit/Sale", value: "$88", sub: "This month", positive: true },
-];
+export function SalesSummaryCards({ className, sales = [] }: Props) {
+  const totalSales = sales.length;
+  
+  let totalRevenue = 0;
+  let totalProfit = 0;
+  
+  sales.forEach(s => {
+    const salePrice = Number(s.salePrice);
+    const cost = Number(s.inventoryItem.purchasePrice);
+    totalRevenue += salePrice;
+    totalProfit += (salePrice - cost);
+  });
+  
+  const avgProfit = totalSales > 0 ? (totalProfit / totalSales) : 0;
 
-export function SalesSummaryCards({ className }: Props) {
+  const cards = [
+    { label: "Total Sales", value: totalSales.toString(), sub: "All time" },
+    { label: "Total Revenue", value: `$${totalRevenue.toFixed(2)}`, sub: "All time" },
+    { label: "Net Profit", value: `$${totalProfit.toFixed(2)}`, sub: "All time", positive: totalProfit >= 0 },
+    { label: "Avg Profit/Sale", value: `$${avgProfit.toFixed(2)}`, sub: "All time", positive: avgProfit >= 0 },
+  ];
+
   return (
     <div className={[styles.row, className].filter(Boolean).join(" ")}>
       {cards.map(c => (

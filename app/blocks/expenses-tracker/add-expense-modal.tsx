@@ -1,9 +1,13 @@
+import { useState } from "react";
+import { Form } from "react-router";
 import { IconX } from "@tabler/icons-react";
 import styles from "./add-expense-modal.module.css";
 
 interface Props { className?: string; onClose: () => void; }
 
 export function AddExpenseModal({ className, onClose }: Props) {
+  const [isRecurring, setIsRecurring] = useState(false);
+
   return (
     <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={[styles.modal, className].filter(Boolean).join(" ")}>
@@ -11,21 +15,36 @@ export function AddExpenseModal({ className, onClose }: Props) {
           <span className={styles.title}>Add Expense</span>
           <button className={styles.closeBtn} onClick={onClose}><IconX size={18} /></button>
         </div>
-        <div className={styles.body}>
+        <Form method="post" onSubmit={() => onClose()}>
+          <input type="hidden" name="intent" value="create" />
+          <div className={styles.body}>
           <div className={styles.row}>
-            <div className={styles.field}><label className={styles.label}>Date *</label><input className={styles.input} type="date" /></div>
-            <div className={styles.field}><label className={styles.label}>Amount *</label><input className={styles.input} type="number" placeholder="0.00" /></div>
+            <div className={styles.field}>
+              <label className={styles.label}>
+                <input type="checkbox" name="isRecurring" checked={isRecurring} onChange={e => setIsRecurring(e.target.checked)} style={{marginRight: '8px'}} />
+                Is this a recurring monthly expense?
+              </label>
+            </div>
           </div>
-          <div className={styles.field}><label className={styles.label}>Description *</label><input className={styles.input} placeholder="e.g. StockX seller fee" /></div>
+          <div className={styles.row}>
+            {isRecurring ? (
+              <div className={styles.field}><label className={styles.label}>Day of Month *</label><input name="dayOfMonth" className={styles.input} type="number" min="1" max="31" defaultValue="1" required /></div>
+            ) : (
+              <div className={styles.field}><label className={styles.label}>Date *</label><input name="date" className={styles.input} type="date" required /></div>
+            )}
+            <div className={styles.field}><label className={styles.label}>Amount *</label><input name="amount" className={styles.input} type="number" step="0.01" placeholder="0.00" required /></div>
+          </div>
+          <div className={styles.field}><label className={styles.label}>Description *</label><input name="description" className={styles.input} placeholder="e.g. StockX seller fee" required /></div>
           <div className={styles.field}>
             <label className={styles.label}>Category</label>
-            <select className={styles.input}><option>MARKETPLACE_FEE</option><option>SHIPPING</option><option>BOT_FEE</option><option>ADVERTISING</option><option>STORAGE</option><option>SUPPLIES</option><option>CUSTOM</option></select>
+            <select name="type" className={styles.input}><option value="MARKETPLACE_FEE">Marketplace Fee</option><option value="SHIPPING">Shipping</option><option value="BOT_FEE">Bot Fee</option><option value="ADVERTISING">Advertising</option><option value="STORAGE">Storage</option><option value="SUPPLIES">Supplies</option><option value="CUSTOM">Custom</option></select>
           </div>
         </div>
         <div className={styles.footer}>
-          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button className={styles.saveBtn}>Save Expense</button>
+          <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+          <button type="submit" className={styles.saveBtn}>Save Expense</button>
         </div>
+        </Form>
       </div>
     </div>
   );

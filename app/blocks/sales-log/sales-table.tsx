@@ -1,9 +1,8 @@
-import { mockSales } from "~/data/mock-data";
 import styles from "./sales-table.module.css";
 
-interface Props { className?: string; }
+interface Props { className?: string; sales?: any[]; }
 
-export function SalesTable({ className }: Props) {
+export function SalesTable({ className, sales = [] }: Props) {
   return (
     <div className={[styles.wrap, className].filter(Boolean).join(" ")}>
       <div className={styles.tableWrap}>
@@ -19,20 +18,28 @@ export function SalesTable({ className }: Props) {
             </tr>
           </thead>
           <tbody>
-            {mockSales.map(s => (
-              <tr key={s.id} className={styles.tr}>
-                <td className={styles.td}>{s.item}</td>
-                <td className={styles.td}>{s.marketplace}</td>
-                <td className={styles.td}>${s.salePrice}</td>
-                <td className={styles.td}>{s.date}</td>
-                <td className={styles.td}>{s.margin}%</td>
-                <td className={styles.td}>
-                  <span className={[styles.profitBadge, s.profit >= 0 ? styles.positive : styles.negative].join(" ")}>
-                    {s.profit >= 0 ? "+" : ""}${s.profit}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {sales.map(s => {
+              const salePrice = Number(s.salePrice);
+              const cost = Number(s.inventoryItem.purchasePrice);
+              const profit = salePrice - cost;
+              const margin = salePrice > 0 ? ((profit / salePrice) * 100).toFixed(1) : 0;
+              const dateObj = new Date(s.saleDate);
+              
+              return (
+                <tr key={s.id} className={styles.tr}>
+                  <td className={styles.td}>{s.inventoryItem.name}</td>
+                  <td className={styles.td}>{s.marketplace}</td>
+                  <td className={styles.td}>${salePrice.toFixed(2)}</td>
+                  <td className={styles.td}>{dateObj.toLocaleDateString()}</td>
+                  <td className={styles.td}>{margin}%</td>
+                  <td className={styles.td}>
+                    <span className={[styles.profitBadge, profit >= 0 ? styles.positive : styles.negative].join(" ")}>
+                      {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
