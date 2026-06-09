@@ -1,10 +1,35 @@
-.DS_Store
+# Dependencies
 /node_modules/
 
-# React Router
-/.react-router/
-/build/
+# Environment variables
 .env
+.env.local
+.env.*.local
 
-.netlify
+# Build output
+/build/
+/.react-router/
 .vite/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.stackdump
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Netlify
+.netlify
+
+# Prisma
+prisma/*.db
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
