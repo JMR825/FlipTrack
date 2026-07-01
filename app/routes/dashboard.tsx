@@ -24,6 +24,55 @@ export async function loader({ request }: Route.LoaderArgs) {
     return { inventoryStats: null, salesData: [], expensesData: [] };
   }
 
+  const url = new URL(request.url);
+  const range = url.searchParams.get("range") || "month";
+  const from = url.searchParams.get("from");
+  const to = url.searchParams.get("to");
+
+  let startDate: Date | undefined;
+  let endDate: Date | undefined;
+  const now = new Date();
+
+  if (range === "month") {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (range === "3months") {
+    startDate = new Date();
+    startDate.setDate(now.getDate() - 90);
+  } else if (range === "year") {
+    startDate = new Date();
+    startDate.setDate(now.getDate() - 365);
+  } else if (range === "custom") {
+    if (from) {
+      const parsedFrom = new Date(from);
+      if (!isNaN(parsedFrom.getTime())) {
+        startDate = parsedFrom;
+      }
+    }
+    if (to) {
+      const parsedTo = new Date(to);
+      if (!isNaN(parsedTo.getTime())) {
+        endDate = parsedTo;
+        endDate.setHours(23, 59, 59, 999);
+      }
+    }
+  }
+
+  const saleWhereClause: any = { userId: user.id };
+  const expenseWhereClause: any = { userId: user.id };
+
+  if (startDate || endDate) {
+    saleWhereClause.saleDate = {};
+    expenseWhereClause.date = {};
+    if (startDate) {
+      saleWhereClause.saleDate.gte = startDate;
+      expenseWhereClause.date.gte = startDate;
+    }
+    if (endDate) {
+      saleWhereClause.saleDate.lte = endDate;
+      expenseWhereClause.date.lte = endDate;
+    }
+  }
+
   const [inventoryStats, salesData, expensesData] = await Promise.all([
     prisma.inventoryItem.aggregate({
       where: { userId: user.id, status: 'IN_STOCK' },
@@ -31,12 +80,12 @@ export async function loader({ request }: Route.LoaderArgs) {
       _count: true,
     }),
     prisma.sale.findMany({
-      where: { userId: user.id },
+      where: saleWhereClause,
       include: { expenses: true, inventoryItem: true },
       orderBy: { saleDate: 'desc' },
     }),
     prisma.expense.findMany({
-      where: { userId: user.id },
+      where: expenseWhereClause,
     }),
   ]);
 
