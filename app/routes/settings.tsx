@@ -48,7 +48,7 @@ export async function action({ request }: Route.ActionArgs) {
     const theme = formData.get("theme") as string;
     await prisma.user.update({
       where: { id: authUser.id },
-      data: { currency, theme }
+      data: { currency: currency as any, theme: theme as any }
     });
   } else if (intent === "update-notifications") {
     const emailNotifications = formData.get("emailNotifications") === "on";
