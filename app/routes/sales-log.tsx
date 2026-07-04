@@ -46,14 +46,24 @@ export async function loader({ request }: Route.LoaderArgs) {
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.$queryRaw<{ totalRevenue: number, totalProfit: number }[]>`
-      SELECT 
-        COALESCE(SUM(s."salePrice"), 0) as "totalRevenue",
-        COALESCE(SUM(s."salePrice" - i."purchasePrice"), 0) as "totalProfit"
-      FROM "Sale" s
-      JOIN "InventoryItem" i ON s."inventoryItemId" = i.id
-      WHERE s."userId" = ${user.id}
-    `
+
+    prisma.$queryRaw<{ totalRevenue: number; totalProfit: number }[]>`
+  SELECT
+    COALESCE(SUM(s."salePrice"), 0) AS "totalRevenue",
+    COALESCE(
+      SUM(
+        s."salePrice"
+        - i."purchasePrice"
+        - s."platformFee"
+        - s."shippingCost"
+      ),
+      0
+    ) AS "totalProfit"
+  FROM "Sale" s
+  JOIN "InventoryItem" i
+    ON s."inventoryItemId" = i.id
+  WHERE s."userId" = ${user.id}
+`
   ]);
 
   const totalRevenue = Number(metricsResult[0]?.totalRevenue || 0);
@@ -90,6 +100,10 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "create") {
     const inventoryItemId = formData.get("inventoryItemId") as string;
     const salePrice = Number(formData.get("salePrice"));
+
+    const platformFee = Number(formData.get("platformFee") || 0);
+    const shippingCost = Number(formData.get("shippingCost") || 0);
+
     const saleDate = new Date(formData.get("saleDate") as string);
     const marketplace = formData.get("marketplace") as any;
     const trackingNumber = formData.get("trackingNumber") as string;
@@ -100,6 +114,8 @@ export async function action({ request }: Route.ActionArgs) {
           userId: user.id,
           inventoryItemId,
           salePrice,
+          platformFee,
+          shippingCost,
           saleDate,
           marketplace,
           trackingNumber,
