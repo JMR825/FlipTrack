@@ -43,4 +43,10 @@ export default [
   route("/api/export/tax", "routes/api.export.tax.ts"),
   route("/api/inventory/search", "routes/api.inventory.search.ts"),
   route("/api/integrations", "routes/api.integrations.ts"),
+
+  // Serve static probe endpoints without breaking client routing
+  route(
+    "/.well-known/appspecific/com.chrome.devtools.json",
+    "routes/well-known.tsx"
+  ),
 ] satisfies RouteConfig;

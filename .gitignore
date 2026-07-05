@@ -10,7 +10,7 @@
 /build/
 /.react-router/
 .vite/
-
+src/
 # OS files
 .DS_Store
 Thumbs.db
