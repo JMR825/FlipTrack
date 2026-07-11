@@ -1,39 +1,10 @@
 import { useState } from "react";
 import styles from "./magic-link-option.module.css";
 import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseBrowserClient } from "~/utils/supabase.client";
 
 interface Props {
   className?: string;
-}
-
-function getSupabaseClient() {
-  let supabaseUrl: string | undefined;
-  let supabaseAnonKey: string | undefined;
-
-  // 1. Safe extraction for Next.js / Webpack
-  try {
-    supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  } catch (e) {
-    // process is completely missing in the browser environment
-  }
-
-  // 2. Safe fallback extraction for Vite / Turbopack
-  if (!supabaseUrl || !supabaseAnonKey) {
-    try {
-      // @ts-ignore - bypass compilation warnings if import.meta is missing
-      supabaseUrl = import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
-      // @ts-ignore
-      supabaseAnonKey = import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
-    } catch (e) {
-      // import.meta is completely missing in this environment
-    }
-  }
-
-  // Final confirmation check
-  if (!supabaseUrl || !supabaseAnonKey) return null;
-
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
 
 export function MagicLinkOption({ className }: Props) {
@@ -59,7 +30,8 @@ export function MagicLinkOption({ className }: Props) {
 
     setLoading(true);
     try {
-      const supabase = getSupabaseClient();
+      //Calling getSupabaseBroswerClient from utils supabase.Client
+      const supabase = getSupabaseBrowserClient();
       if (!supabase) {
         setErrorMsg("Supabase is not configured (missing URL/anon key).");
         return;
